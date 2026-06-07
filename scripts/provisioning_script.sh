@@ -27,10 +27,10 @@ sudo apt-get install -y trivy
 # 2. Install ZAP (Zed Attack Proxy)
 # ==========================================
 echo "Installing ZAP..."
-# The snap package is the most reliable way to keep ZAP automatically updated on Ubuntu
-sudo snap install zaproxy --classic
-# Create a convenient symlink so it can be called directly via 'zap'
-sudo ln -s /snap/bin/zaproxy /usr/local/bin/zap
+snap install zaproxy || snap refresh zaproxy || true
+ln -sf /snap/bin/zaproxy /usr/local/bin/zaproxy
+zaproxy -version || true
+apt autoremove -y || true
 
 # ==========================================
 # 3. Install ScoutSuite (Multi-Cloud Auditor)
@@ -48,6 +48,10 @@ sudo ln -s /opt/scoutsuite/venv/bin/scout /usr/local/bin/scoutsuite
 echo "========================================="
 echo " Installing Docker"
 echo "========================================="
+
+apt-get remove -y docker-compose-v2 || true
+apt-get remove -y docker.io docker-doc docker-compose podman-docker containerd runc || true
+apt-get --fix-broken install -y || true
 
 install -m 0755 -d /etc/apt/keyrings
 
@@ -75,6 +79,7 @@ systemctl enable docker
 systemctl start docker
 
 usermod -aG docker packer || true
+
 
 echo "========================================="
 echo " Installing Greenbone Community Edition"
