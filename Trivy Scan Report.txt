@@ -1,0 +1,43 @@
+Trivy Scan Report:
+==================
+
+root@ubuntu-security-lab:~# trivy fs .
+2026-06-07T18:21:02+05:30       INFO    [vulndb] Need to update DB
+2026-06-07T18:21:02+05:30       INFO    [vulndb] Downloading vulnerability DB...
+2026-06-07T18:21:02+05:30       INFO    [vulndb] Downloading artifact...        repo="mirror.gcr.io/aquasec/trivy-db:2"
+95.35 MiB / 95.35 MiB [------------------------------------------------------------------------------------] 100.00% 3.02 MiB p/s 32s
+2026-06-07T18:21:36+05:30       INFO    [vulndb] Artifact successfully downloaded       repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-06-07T18:21:36+05:30       INFO    [vuln] Vulnerability scanning is enabled
+2026-06-07T18:21:36+05:30       INFO    [secret] Secret scanning is enabled
+2026-06-07T18:21:36+05:30       INFO    [secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-06-07T18:21:36+05:30       INFO    [secret] Please see https://trivy.dev/docs/v0.71/guide/scanner/secret#recommendation for faster secret detection
+2026-06-07T18:21:48+05:30       INFO    Number of language-specific files       num=0
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬──────┬─────────────────┬─────────┐
+│                                      Target                                      │ Type │ Vulnerabilities │ Secrets │
+├──────────────────────────────────────────────────────────────────────────────────┼──────┼─────────────────┼─────────┤
+│ .cache/pip/http-v2/8/0/6/3/6/806366e41f528c7b7fbd8d56ea0250ba9ebcf4270a1af519a9- │ text │        -        │    1    │
+│ bb79da.body                                                                      │      │                 │         │
+└──────────────────────────────────────────────────────────────────────────────────┴──────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+.cache/pip/http-v2/8/0/6/3/6/806366e41f528c7b7fbd8d56ea0250ba9ebcf4270a1af519a9bb79da.body (secrets)
+
+Total: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 1, HIGH: 0, CRITICAL: 0)
+
+MEDIUM: JWT (jwt-token)
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+JWT token
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ .cache/pip/http-v2/8/0/6/3/6/806366e41f528c7b7fbd8d56ea0250ba9ebcf4270a1af519a9bb79da.body:76 (offset: 3049 bytes)
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  74       >>> encoded = jwt.encode({"some": "payload"}, "secret", algorithm="HS256")
+  75       >>> print(encoded)
+  76 [     *********************************************************************************************************
+  77       >>> jwt.decode(encoded, "secret", algorithms=["HS256"])
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
