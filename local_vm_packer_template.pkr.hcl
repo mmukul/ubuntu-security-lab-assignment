@@ -8,9 +8,10 @@ packer {
 }
 
 source "virtualbox-iso" "ubuntu" {
-  vm_name       = "ubuntu-26-04-local-vm"
+  vm_name       = "ubuntu-security-lab"
   guest_os_type = "Ubuntu_64"
 
+  # Use Ubuntu 24.04 Server ISO for stable autoinstall
   iso_url      = "C:/Users/smile/Downloads/ubuntu-26.04-live-server-amd64.iso"
   iso_checksum = "none"
 
@@ -24,16 +25,22 @@ source "virtualbox-iso" "ubuntu" {
 
   ssh_username = "packer"
   ssh_password = "packer"
-  ssh_timeout  = "90m"
+  ssh_host     = "127.0.0.1"
+  ssh_port     = 2222
+  ssh_timeout  = "120m"
 
-  boot_wait = "20s"
+  vboxmanage = [
+    ["modifyvm", "{{ .Name }}", "--natpf1", "guestssh,tcp,,2222,,22"]
+  ]
+
+  boot_wait = "30s"
 
 boot_command = [
-  "<esc><wait>",
-  "c<wait>",
-  "linux /casper/vmlinuz autoinstall ds=nocloud\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<enter>",
-  "initrd /casper/initrd<enter>",
-  "boot<enter>"
+  "e<wait>",
+  "<down><down><down>",
+  "<end>",
+  " autoinstall ds=nocloud\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---",
+  "<f10>"
 ]
 
   shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
@@ -42,7 +49,7 @@ boot_command = [
 }
 
 build {
-  name    = "ubuntu-26-04-local-vm"
+  name    = "ubuntu-security-lab"
   sources = ["source.virtualbox-iso.ubuntu"]
 
   provisioner "file" {
@@ -51,10 +58,12 @@ build {
   }
 
   provisioner "shell" {
-  inline = [
-    "sudo -n whoami",
-    "chmod +x /tmp/provisioning_script.sh",
-    "sudo -n bash /tmp/provisioning_script.sh"
-  ]
-}
+    inline = [
+      "whoami",
+      "groups",
+      "sudo -n whoami",
+      "chmod +x /tmp/provisioning_script.sh",
+      "sudo -n bash -x /tmp/provisioning_script.sh"
+    ]
+  }
 }
