@@ -7,6 +7,13 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y curl wget git vim unzip python3-pip python3-venv apt-transport-https gnupg lsb-release default-jre unzip snapd docker.io docker-compose-v2 nodejs npm binwalk
 
+echo "========================================="
+echo " Configuring SSH"
+echo "========================================="
+
+systemctl enable ssh
+systemctl restart ssh || true
+
 # ==========================================
 # 1. Install Trivy (Container/FS Scanner)
 # ==========================================
@@ -44,23 +51,25 @@ echo "========================================="
 
 install -m 0755 -d /etc/apt/keyrings
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
 gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 chmod a+r /etc/apt/keyrings/docker.gpg
 
-echo
-"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg]
-https://download.docker.com/linux/ubuntu
-$(. /etc/os-release && echo $VERSION_CODENAME) stable" |
-tee /etc/apt/sources.list.d/docker.list > /dev/nul
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/ubuntu \
+$(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
+tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-apt-get install -y
-docker-ce
-docker-ce-cli
-containerd.io
-docker-buildx-plugin
-docker-compose-plugin
+apt-get update -y
+
+apt-get install -y \
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  docker-buildx-plugin \
+  docker-compose-plugin
 
 systemctl enable docker
 systemctl start docker
@@ -74,8 +83,8 @@ echo "========================================="
 mkdir -p /opt/greenbone
 cd /opt/greenbone
 
-curl -L
-https://greenbone.github.io/docs/latest/_static/docker-compose.yml
+curl -L \
+https://greenbone.github.io/docs/latest/_static/docker-compose.yml \
 -o docker-compose.yml
 
 docker compose pull || true
@@ -94,11 +103,11 @@ echo ""
 echo "===================================================="
 echo " Ubuntu Security Lab"
 echo "===================================================="
-echo " SSH : ssh packer@${IP}"
-echo " Greenbone : https://${IP}:9392"
+echo " SSH        : ssh packer@${IP}"
+echo " Greenbone  : https://${IP}:9392"
 echo ""
 echo " Containers : docker ps"
-echo " Logs : docker compose -f /opt/greenbone/docker-compose.yml logs"
+echo " Logs       : docker compose -f /opt/greenbone/docker-compose.yml logs"
 echo "===================================================="
 echo ""
 EOF
@@ -119,13 +128,25 @@ echo "===================================================="
 echo " Ubuntu Security Lab"
 echo "===================================================="
 echo " IP Address : ${IP}"
-echo " SSH : ssh packer@${IP}"
-echo " Greenbone : https://${IP}:9392"
+echo " SSH        : ssh packer@${IP}"
+echo " Greenbone  : https://${IP}:9392"
+echo ""
+echo "Commands:"
+echo " docker ps"
+echo " docker compose -f /opt/greenbone/docker-compose.yml logs"
 echo "===================================================="
 echo ""
 EOF
 
 chmod +x /usr/local/bin/lab-info
+
+echo "========================================="
+echo " Validation"
+echo "========================================="
+
+docker --version || true
+docker compose version || true
+ss -tulpn | grep 9392 || true
 
 
 # ==========================================
