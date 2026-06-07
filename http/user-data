@@ -1,0 +1,46 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  locale: en_US.UTF-8
+
+  keyboard:
+    layout: us
+
+  timezone: Asia/Kolkata
+
+  identity:
+    hostname: ubuntu-genai-vm
+    username: packer
+    password: "$6$rounds=4096$packer$GZlm21Om1elLqY54cYGda/XJj2fVh0MFksq5OjzlvnK4KBg2B.CK1TsCeR.u0o6Q6N2TwE0Tnp2IhXcBdrmdN/"
+
+  ssh:
+    install-server: true
+    allow-pw: true
+
+  storage:
+    layout:
+      name: direct
+
+  packages:
+    - openssh-server
+    - curl
+    - wget
+    - git
+    - unzip
+    - vim
+    - net-tools
+    - python3
+    - python3-pip
+    - python3-venv
+
+  user-data:
+    ssh_pwauth: true
+
+  late-commands:
+    - curtin in-target --target=/target -- bash -c "echo 'packer:packer' | chpasswd"
+    - curtin in-target --target=/target -- usermod -aG sudo packer
+    - curtin in-target --target=/target -- bash -c "echo 'packer ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/packer"
+    - curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/packer
+    - curtin in-target --target=/target -- systemctl enable ssh
+    - curtin in-target --target=/target -- bash -c "grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config"
