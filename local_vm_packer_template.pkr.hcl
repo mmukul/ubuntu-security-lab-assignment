@@ -28,6 +28,8 @@ source "virtualbox-iso" "ubuntu" {
   ssh_host     = "127.0.0.1"
   ssh_port     = 2222
   ssh_timeout  = "120m"
+  
+  ssh_handshake_attempts = 100
 
   vboxmanage = [
     ["modifyvm", "{{ .Name }}", "--natpf1", "guestssh,tcp,,2222,,22"]
